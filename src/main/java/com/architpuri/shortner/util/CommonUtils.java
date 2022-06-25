@@ -1,4 +1,4 @@
-package com.architpuri.shortner;
+package com.architpuri.shortner.util;
 
 import org.apache.commons.validator.routines.UrlValidator;
 

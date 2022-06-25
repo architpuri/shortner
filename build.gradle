@@ -20,6 +20,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.apache.commons:commons-lang3'
 	implementation 'commons-validator:commons-validator:1.7'
+	implementation 'org.ehcache:ehcache:3.9.2'
 
 //	implementation 'org.flywaydb:flyway-core'
 	implementation "org.flywaydb:flyway-mysql"

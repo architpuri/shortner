@@ -1,6 +1,6 @@
-package com.architpuri.shortner.api;
+package com.architpuri.shortner.controller;
 
-import com.architpuri.shortner.CommonUtils;
+import com.architpuri.shortner.util.CommonUtils;
 import com.architpuri.shortner.service.ShortenerService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
