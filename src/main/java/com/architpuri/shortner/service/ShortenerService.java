@@ -1,8 +1,8 @@
 package com.architpuri.shortner.service;
 
-import com.architpuri.shortner.ShorteningUtil;
+import com.architpuri.shortner.helper.ShorteningHelper;
+import com.architpuri.shortner.helper.UrlDetailsHelper;
 import com.architpuri.shortner.model.UrlDetails;
-import com.architpuri.shortner.repo.UrlDetailsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ public class ShortenerService {
     private String APP_URL = "http://127.0.0.1:8080/";
 
     @Autowired
-    private UrlDetailsRepository urlDetailsRepository;
+    private ShorteningHelper shorteningHelper;
 
     @Autowired
-    private ShorteningUtil shorteningUtil;
+    private UrlDetailsHelper urlDetailsHelper;
 
     public ResponseEntity<String> fetchUrlEntry(final String inputUrl) {
-        UrlDetails urlDetails = urlDetailsRepository.findByAliasUrl(inputUrl);
+        UrlDetails urlDetails = urlDetailsHelper.getUrlDetailsByAlias(inputUrl);
         if (urlDetails != null) {
             if (urlDetails.getRedirect()) {
                 return ResponseEntity.status(HttpStatus.FOUND)
@@ -37,30 +37,27 @@ public class ShortenerService {
         return new ResponseEntity<>("Record Not found", HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<String> createUrlEntry(final String inputUrl, final String custom, final Boolean redirect) {
-        UrlDetails urlDetails = urlDetailsRepository.findByOriginalUrl(inputUrl);
+    public ResponseEntity<String> createUrlEntry(final String originalUrl, final String custom, final Boolean redirect) {
+        UrlDetails urlDetails = urlDetailsHelper.getUrlDetailsByOriginal(originalUrl);
         if (urlDetails != null) {
             return new ResponseEntity<>("This url is already mapped.", HttpStatus.CONFLICT);
         }
         String aliasUrl;
         if (StringUtils.isNotEmpty(custom)) {
-            UrlDetails urlDetailsCustom = urlDetailsRepository.findByAliasUrl(custom);
+            UrlDetails urlDetailsCustom = urlDetailsHelper.getUrlDetailsByAlias(custom);
             if (urlDetailsCustom != null) {
                 return new ResponseEntity<>("Custom Url cannot be used as it is already being used",
                         HttpStatus.CONFLICT);
             }
             aliasUrl = custom;
         } else {
-            aliasUrl = shorteningUtil.generateRandomShortUrl();
+            aliasUrl = shorteningHelper.generateRandomShortUrl();
         }
-        try {
-            UrlDetails savedUrlDetails = urlDetailsRepository.save(new UrlDetails(aliasUrl, inputUrl, redirect));
-            if (savedUrlDetails != null) {
-                return new ResponseEntity<>("Custom url assigned - " + APP_URL + aliasUrl + " for provided url " + inputUrl, HttpStatus.CREATED);
-            }
-        } catch (Exception e) {
-            log.error("Some error Occured. Please Try Again.", e);
+        UrlDetails savedUrlDetails = urlDetailsHelper.saveDetails(new UrlDetails(aliasUrl, originalUrl, redirect));
+        if (savedUrlDetails != null) {
+            return new ResponseEntity<>("Custom url assigned - " + APP_URL + aliasUrl + " for provided url "
+                    + originalUrl, HttpStatus.CREATED);
         }
-        return new ResponseEntity<>("Some error Occured. Please Try Again.", HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>("Some error Occurred. Please Try Again.", HttpStatus.NOT_ACCEPTABLE);
     }
 }

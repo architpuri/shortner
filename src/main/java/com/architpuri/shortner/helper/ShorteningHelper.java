@@ -1,4 +1,4 @@
-package com.architpuri.shortner;
+package com.architpuri.shortner.helper;
 
 import com.architpuri.shortner.model.UrlDetails;
 import com.architpuri.shortner.repo.UrlDetailsRepository;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import java.util.Random;
 
 @Component
-public class ShorteningUtil {
+public class ShorteningHelper {
 
     @Autowired
-    private UrlDetailsRepository urlDetailsRepository;
+    private UrlDetailsHelper urlDetailsHelper;
 
     private static final int NUM_CHARS_SHORT_LINK = 7;
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -34,7 +34,7 @@ public class ShorteningUtil {
     }
 
     private Boolean isAliasPresent(final String recommendedUrl) {
-        UrlDetails details = urlDetailsRepository.findByAliasUrl(recommendedUrl);
+        UrlDetails details = urlDetailsHelper.getUrlDetailsByAlias(recommendedUrl);
         if (details != null) {
             return true;
         }
