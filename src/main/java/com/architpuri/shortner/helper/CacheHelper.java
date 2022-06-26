@@ -39,4 +39,10 @@ public class CacheHelper {
             log.error("Json Processing Exception while putting data into urlDetailsCache ", e);
         }
     }
+
+    public void removeFromCache(final UrlDetails urlDetails) {
+        if (urlDetailCache.containsKey(urlDetails.getAliasUrl())) {
+            urlDetailCache.remove(urlDetails.getAliasUrl());
+        }
+    }
 }

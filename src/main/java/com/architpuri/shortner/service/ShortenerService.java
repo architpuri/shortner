@@ -60,4 +60,13 @@ public class ShortenerService {
         }
         return new ResponseEntity<>("Some error Occurred. Please Try Again.", HttpStatus.NOT_ACCEPTABLE);
     }
+
+    public ResponseEntity<String> deleteUrlEntry(final String originalUrl) {
+        UrlDetails urlDetails = urlDetailsHelper.getUrlDetailsByOriginal(originalUrl);
+        if (urlDetails == null) {
+            return new ResponseEntity<>("Record not found", HttpStatus.NOT_FOUND);
+        }
+        urlDetailsHelper.deleteDetails(urlDetails);
+        return new ResponseEntity<>("Record Deleted", HttpStatus.OK);
+    }
 }

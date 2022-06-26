@@ -2,6 +2,7 @@ package com.architpuri.shortner.controller;
 
 import com.architpuri.shortner.util.CommonUtils;
 import com.architpuri.shortner.service.ShortenerService;
+import com.architpuri.shortner.util.MessageConstants;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,19 +25,25 @@ public class ShortenerController {
 
     @PostMapping(value = "shorten")
     @ApiOperation("To generate a shortened url.")
-    public ResponseEntity<String> shortenApi(final @RequestParam("inputUrl") String inputUrl,
+    public ResponseEntity<String> shortenApi(final @RequestParam("inputUrl") String originalUrl,
                                              final @RequestParam(required = false) String desiredUrl,
                                              final @RequestParam(required = false) String redirect) {
+        //By default redirect is true
         Boolean isRedirect = true;
         if (StringUtils.isNotEmpty(redirect)) {
             if ("No".equalsIgnoreCase(redirect)) {
-                isRedirect = true;
+                isRedirect = false;
             }
         }
-        if (CommonUtils.isValidUrl(inputUrl)) {
-            return shortenerService.createUrlEntry(inputUrl, desiredUrl,isRedirect);
+        if (CommonUtils.isValidUrl(originalUrl)) {
+            return shortenerService.createUrlEntry(originalUrl, desiredUrl, isRedirect);
         } else {
-            return new ResponseEntity<>("Invalid Input Url Attribute", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(MessageConstants.INVALID_URL_INPUT, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteApi(final @RequestParam("inputUrl") String originalUrl){
+        return shortenerService.deleteUrlEntry(originalUrl);
     }
 }

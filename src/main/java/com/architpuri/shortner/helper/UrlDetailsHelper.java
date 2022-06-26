@@ -46,4 +46,9 @@ public class UrlDetailsHelper {
         }
         return null;
     }
+
+    public void deleteDetails(final UrlDetails urlDetails) {
+        cacheHelper.removeFromCache(urlDetails);
+        urlDetailsRepository.delete(urlDetails);
+    }
 }
