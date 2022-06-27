@@ -3,11 +3,13 @@ package com.architpuri.shortner.service;
 import com.architpuri.shortner.helper.ShorteningHelper;
 import com.architpuri.shortner.helper.UrlDetailsHelper;
 import com.architpuri.shortner.model.UrlDetails;
+import com.architpuri.shortner.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -15,8 +17,6 @@ import java.net.URI;
 @Service
 @Slf4j
 public class ShortenerService {
-
-    private String APP_URL = "http://127.0.0.1:8080/";
 
     @Autowired
     private ShorteningHelper shorteningHelper;
@@ -37,7 +37,8 @@ public class ShortenerService {
         return new ResponseEntity<>("Record Not found", HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<String> createUrlEntry(final String originalUrl, final String custom, final Boolean redirect) {
+    public ResponseEntity<String> createUrlEntry(final String originalUrl, final String custom, final Boolean redirect,
+                                                 final Long expiryMillisecond) {
         UrlDetails urlDetails = urlDetailsHelper.getUrlDetailsByOriginal(originalUrl);
         if (urlDetails != null) {
             return new ResponseEntity<>("This url is already mapped.", HttpStatus.CONFLICT);
@@ -51,11 +52,12 @@ public class ShortenerService {
             }
             aliasUrl = custom;
         } else {
-            aliasUrl = shorteningHelper.generateRandomShortUrl();
+            aliasUrl = shorteningHelper.generateRandomShortUrl(originalUrl.length()/2);
         }
-        UrlDetails savedUrlDetails = urlDetailsHelper.saveDetails(new UrlDetails(aliasUrl, originalUrl, redirect));
+        Long currentEpochTime = CommonUtils.getCurrentEpochTime();
+        UrlDetails savedUrlDetails = urlDetailsHelper.saveDetails(new UrlDetails(aliasUrl, originalUrl, redirect, currentEpochTime, currentEpochTime + expiryMillisecond));
         if (savedUrlDetails != null) {
-            return new ResponseEntity<>("Custom url assigned - " + APP_URL + aliasUrl + " for provided url "
+            return new ResponseEntity<>("Custom url assigned - " + CommonUtils.getApplicationUrl() + aliasUrl + " for provided url "
                     + originalUrl, HttpStatus.CREATED);
         }
         return new ResponseEntity<>("Some error Occurred. Please Try Again.", HttpStatus.NOT_ACCEPTABLE);
@@ -68,5 +70,13 @@ public class ShortenerService {
         }
         urlDetailsHelper.deleteDetails(urlDetails);
         return new ResponseEntity<>("Record Deleted", HttpStatus.OK);
+    }
+
+    /**
+     * Scheduled every 5 mins.
+     */
+    @Scheduled(fixedRate = 300000)
+    public void cleanup() {
+        urlDetailsHelper.cleanExpiredRecords();
     }
 }

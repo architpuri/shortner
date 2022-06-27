@@ -33,7 +33,8 @@ public class ShortenerServiceTest {
 
     @Test
     public void fetchUrlEntry_NoRedirect_Success() {
-        UrlDetails dummyDetails = new UrlDetails(1L, "test-url", "http://test.com", false);
+        UrlDetails dummyDetails = getDummyUrlDetails();
+        dummyDetails.setRedirect(false);
         when(urlDetailsHelper.getUrlDetailsByAlias(anyString())).thenReturn(dummyDetails);
         ResponseEntity<String> result = shortenerService.fetchUrlEntry("test-url");
         Assert.assertEquals(HttpStatus.FOUND, result.getStatusCode());
@@ -41,17 +42,19 @@ public class ShortenerServiceTest {
 
     @Test
     public void fetchUrlEntry_Redirect_Success() {
-        UrlDetails dummyDetails = new UrlDetails(1L, "test-url", "http://test.com", true);
-        when(urlDetailsHelper.getUrlDetailsByAlias(anyString())).thenReturn(dummyDetails);
+        when(urlDetailsHelper.getUrlDetailsByAlias(anyString())).thenReturn(getDummyUrlDetails());
         ResponseEntity<String> result = shortenerService.fetchUrlEntry("test-url");
         Assert.assertEquals(HttpStatus.FOUND, result.getStatusCode());
     }
 
     @Test
     public void createUrlEntry_AlreadyExists() {
-        UrlDetails dummyDetails = new UrlDetails(1L, "test-url", "http://test.com", true);
-        when(urlDetailsHelper.getUrlDetailsByAlias(anyString())).thenReturn(dummyDetails);
-        ResponseEntity<String> result = shortenerService.createUrlEntry("http://test.com", "test-url", true);
+        when(urlDetailsHelper.getUrlDetailsByAlias(anyString())).thenReturn(getDummyUrlDetails());
+        ResponseEntity<String> result = shortenerService.createUrlEntry("http://test.com", "test-url", true,10000000L );
         Assert.assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+    }
+
+    private UrlDetails getDummyUrlDetails() {
+        return new UrlDetails(1L, "test-url", "http://test.com", true, 10000000L, 10000L);
     }
 }

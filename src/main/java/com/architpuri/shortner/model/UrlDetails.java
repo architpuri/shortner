@@ -21,8 +21,10 @@ public class UrlDetails {
     private String aliasUrl;
     private String originalUrl;
     private Boolean redirect;
+    private Long createdOn;
+    private Long expiry;
 
-    public UrlDetails(final String aliasUrl, final String originalUrl, final Boolean redirect) {
+    public UrlDetails(final String aliasUrl, final String originalUrl, final Boolean redirect, final Long createdOn, final Long expiry) {
         this.aliasUrl = aliasUrl;
         this.originalUrl = originalUrl;
         this.redirect = redirect;

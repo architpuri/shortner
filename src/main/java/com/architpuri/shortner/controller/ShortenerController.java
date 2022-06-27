@@ -27,7 +27,8 @@ public class ShortenerController {
     @ApiOperation("To generate a shortened url.")
     public ResponseEntity<String> shortenApi(final @RequestParam("inputUrl") String originalUrl,
                                              final @RequestParam(required = false) String desiredUrl,
-                                             final @RequestParam(required = false) String redirect) {
+                                             final @RequestParam(required = false) String redirect,
+                                             final @RequestParam(value = "expiryInSeconds", required = false) Long expiryInSeconds) {
         //By default redirect is true
         Boolean isRedirect = true;
         if (StringUtils.isNotEmpty(redirect)) {
@@ -36,14 +37,22 @@ public class ShortenerController {
             }
         }
         if (CommonUtils.isValidUrl(originalUrl)) {
-            return shortenerService.createUrlEntry(originalUrl, desiredUrl, isRedirect);
+            return shortenerService.createUrlEntry(originalUrl, desiredUrl, isRedirect,getExpiryMillisecond(expiryInSeconds));
         } else {
             return new ResponseEntity<>(MessageConstants.INVALID_URL_INPUT, HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteApi(final @RequestParam("inputUrl") String originalUrl){
+    @ApiOperation("To clear the existing record for deletion.")
+    public ResponseEntity<String> deleteApi(final @RequestParam("inputUrl") String originalUrl) {
         return shortenerService.deleteUrlEntry(originalUrl);
+    }
+
+    private Long getExpiryMillisecond(final Long expiryInputSeconds) {
+        if(expiryInputSeconds == null){
+            return CommonUtils.getDefaultExpiry();
+        }
+        return expiryInputSeconds*1000;
     }
 }
