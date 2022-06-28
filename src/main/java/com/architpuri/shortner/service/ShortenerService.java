@@ -39,10 +39,10 @@ public class ShortenerService {
 
     public ResponseEntity<String> createUrlEntry(final String originalUrl, final String custom, final Boolean redirect,
                                                  final Long expiryMillisecond) {
-        UrlDetails urlDetails = urlDetailsHelper.getUrlDetailsByOriginal(originalUrl);
+        /*UrlDetails urlDetails = urlDetailsHelper.getUrlDetailsByOriginal(originalUrl);
         if (urlDetails != null) {
             return new ResponseEntity<>("This url is already mapped.", HttpStatus.CONFLICT);
-        }
+        }*/
         String aliasUrl;
         if (StringUtils.isNotEmpty(custom)) {
             UrlDetails urlDetailsCustom = urlDetailsHelper.getUrlDetailsByAlias(custom);
